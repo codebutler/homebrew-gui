@@ -1,10 +1,11 @@
 class Inkscape < Formula
   desc "Professional vector graphics editor"
   homepage "https://inkscape.org/"
-  url "https://inkscape.org/en/gallery/item/3854/inkscape-0.91.tar.gz"
-  mirror "https://mirrors.kernel.org/debian/pool/main/i/inkscape/inkscape_0.91.orig.tar.gz"
-  sha256 "2ca3cfbc8db53e4a4f20650bf50c7ce692a88dcbf41ebc0c92cd24e46500db20"
-  revision 4
+  url "https://inkscape.org/gallery/item/10552/inkscape-0.92.0.tar.bz2"
+  mirror "https://mirrors.kernel.org/debian/pool/main/i/inkscape/inkscape_0.92.orig.tar.gz"
+  sha256 "b8b4c159a00448d465384533e5a70d3f33e5f9c6b74c76ea5d636ddd6dd7ba56"
+
+  option "with-gtk3", "Build Inkscape with GTK+3 (Experimental)"
 
   bottle do
     sha256 "ee5064b2c82543cb0edb8f0bc18b31218acf736e150023a4ae0f715191aaf54c" => :el_capitan
@@ -14,11 +15,11 @@ class Inkscape < Formula
 
   head do
     url "lp:inkscape", :using => :bzr
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
   end
 
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "libtool" => :build
   depends_on "boost-build" => :build
   depends_on "intltool" => :build
   depends_on "pkg-config" => :build
@@ -29,11 +30,14 @@ class Inkscape < Formula
   depends_on "gettext"
   depends_on "glibmm"
   depends_on "gsl"
-  depends_on "gtkmm"
   depends_on "hicolor-icon-theme"
   depends_on "little-cms"
   depends_on "pango"
   depends_on "popt"
+
+  depends_on "gtkmm3" if build.with? "gtk3"
+  depends_on "gdl" if build.with? "gtk3"
+  depends_on "gtkmm" if build.without? "gtk3"
 
   needs :cxx11
 
@@ -56,8 +60,9 @@ class Inkscape < Formula
       --without-gnome-vfs
     ]
     args << "--disable-poppler-cairo" if build.without? "poppler"
+    args << "--enable-gtk3-experimental" if build.with? "gtk3"
 
-    system "./autogen.sh" if build.head?
+    system "./autogen.sh"
     system "./configure", *args
     system "make", "install"
   end
